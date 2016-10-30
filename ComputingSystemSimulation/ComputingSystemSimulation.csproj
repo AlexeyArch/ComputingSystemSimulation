@@ -43,11 +43,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompSystemParams.cs" />
+    <Compile Include="Event.cs" />
+    <Compile Include="EventGenerator.cs" />
+    <Compile Include="EventsCalendar.cs" />
+    <Compile Include="PriorityTask.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BaseTask.cs" />
+    <Compile Include="Simulation.cs" />
+    <Compile Include="TaskEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CompSystemParams.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

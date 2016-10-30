@@ -10,6 +10,10 @@ namespace ComputingSystemSimulation
     {
         static void Main(string[] args)
         {
+            Simulation simulation = new Simulation();
+            simulation.StartSimulation();
+
+            Console.ReadKey();
         }
     }
 }
