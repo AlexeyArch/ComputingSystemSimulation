@@ -10,6 +10,7 @@ namespace ComputingSystemSimulation
     {
         static void Main(string[] args)
         {
+            Loging.WriteLogFile("", false);
             Simulation simulation = new Simulation();
             simulation.StartSimulation();
 
