@@ -15,7 +15,9 @@ namespace ComputingSystemSimulation
         public double maxTaskWorkTime { get; private set; }
         public double maxFreeMemoryTime { get; private set; }
 
+        //текущее количество свободных ядер
         public int nowCoresCount { get; set; }
+        //текущее количество свободной памяти
         public int nowMemoryCount { get; set; }
 
         public CompSystemParams() { }
@@ -44,6 +46,7 @@ namespace ComputingSystemSimulation
             }
         } 
 
+        //проверка, хватит ли ресурсов на задачу
         public bool isFreeRes (BaseTask task)
         {
             if (task.requiredCores > nowCoresCount

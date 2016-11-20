@@ -30,14 +30,14 @@ namespace ComputingSystemSimulation
                 TaskEvent te = new TaskEvent(Event.EventTypes.AddTask, task.id, task.addTime, task.workTime);
                 eventsCalendar.AddEvent(te);
             }
-           // Console.WriteLine(compSystemParams.nowCoresCount); Console.ReadKey();
+           
         }
 
         public void StartSimulation()
         {
             while (eventsCalendar.EventsCount() > 0)
             {
-                //получение ближайшего события
+                
                 Event e = eventsCalendar.GetEvent();
                 string log = Loging.LogCompSys(compSystemParams);
                 log += "\n" + Loging.LogEvent(e as TaskEvent);
@@ -48,7 +48,7 @@ namespace ComputingSystemSimulation
                         break;
 
                     case Event.EventTypes.BeginComputeTask:
-                        //добавляет событие EndComputeTask
+
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
                                                                 (e as TaskEvent).taskId,
                                                                 e.beginTimestamp + e.duration,
@@ -56,11 +56,11 @@ namespace ComputingSystemSimulation
                                                );
                         compSystemParams.nowCoresCount -= tasks[(e as TaskEvent).taskId].requiredCores;
                         compSystemParams.nowMemoryCount -= tasks[(e as TaskEvent).taskId].requiredMemory;
-                        //отнимает ресурсы
+
                         break;
 
                     case Event.EventTypes.EndComputeTask:
-                        //добавление события FreeMemory
+
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
                                                                 (e as TaskEvent).taskId,
                                                                 e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
@@ -71,7 +71,7 @@ namespace ComputingSystemSimulation
                         break;
 
                     case Event.EventTypes.FreeMemory:
-                        //освобождаем ресурсы
+
                         compSystemParams.nowCoresCount += tasks[(e as TaskEvent).taskId].requiredCores;
                         compSystemParams.nowMemoryCount += tasks[(e as TaskEvent).taskId].requiredMemory;
                         
@@ -81,7 +81,7 @@ namespace ComputingSystemSimulation
                 if (tasksQueue.Count > 0)
                 {
                     BaseTask ts = tasksQueue.Peek();
-                    //проверяем ресурсы
+
                     if (compSystemParams.isFreeRes(ts))
                     {
                         eventsCalendar.AddEvent(new TaskEvent( Event.EventTypes.BeginComputeTask, 
@@ -91,8 +91,7 @@ namespace ComputingSystemSimulation
                                                );
                         tasksQueue.Dequeue();
                     }
-                    
-                    //если есть свободные, до добавляем BeginComputeTask
+
                 }
                 
                 Loging.WriteLogConsole(log, true);
