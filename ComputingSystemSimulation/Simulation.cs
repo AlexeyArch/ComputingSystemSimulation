@@ -26,21 +26,77 @@ namespace ComputingSystemSimulation
 
             //добавление события постановки в очередь
             foreach (BaseTask task in tasks.Values)
-                eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.AddTask, task.id, task.addTime, task.workTime));
+            {
+                TaskEvent te = new TaskEvent(Event.EventTypes.AddTask, task.id, task.addTime, task.workTime);
+                eventsCalendar.AddEvent(te);
+            }
+           
         }
 
         public void StartSimulation()
         {
             while (eventsCalendar.EventsCount() > 0)
             {
-                //получение ближайшего события
+                
                 Event e = eventsCalendar.GetEvent();
+                string log = Loging.LogCompSys(compSystemParams);
+                log += "\n" + Loging.LogEvent(e as TaskEvent);
                 switch(e.type)
                 {
                     case Event.EventTypes.AddTask:
                         tasksQueue.Enqueue(tasks[(e as TaskEvent).taskId]);
                         break;
+
+                    case Event.EventTypes.BeginComputeTask:
+
+                        eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
+                                                                (e as TaskEvent).taskId,
+                                                                e.beginTimestamp + e.duration,
+                                                                e.duration)
+                                               );
+                        compSystemParams.nowCoresCount -= tasks[(e as TaskEvent).taskId].requiredCores;
+                        compSystemParams.nowMemoryCount -= tasks[(e as TaskEvent).taskId].requiredMemory;
+
+                        break;
+
+                    case Event.EventTypes.EndComputeTask:
+
+                        eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
+                                                                (e as TaskEvent).taskId,
+                                                                e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
+                                                                e.duration)
+                                               );
+
+                        
+                        break;
+
+                    case Event.EventTypes.FreeMemory:
+
+                        compSystemParams.nowCoresCount += tasks[(e as TaskEvent).taskId].requiredCores;
+                        compSystemParams.nowMemoryCount += tasks[(e as TaskEvent).taskId].requiredMemory;
+                        
+                        break;
                 }
+
+                if (tasksQueue.Count > 0)
+                {
+                    BaseTask ts = tasksQueue.Peek();
+
+                    if (compSystemParams.isFreeRes(ts))
+                    {
+                        eventsCalendar.AddEvent(new TaskEvent( Event.EventTypes.BeginComputeTask, 
+                                                                (e as TaskEvent).taskId,  
+                                                                e.beginTimestamp, 
+                                                                e.duration) 
+                                               );
+                        tasksQueue.Dequeue();
+                    }
+
+                }
+                
+                Loging.WriteLogConsole(log, true);
+                Loging.WriteLogFile (log);
+
             }
         }
     }

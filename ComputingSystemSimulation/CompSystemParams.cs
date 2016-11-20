@@ -15,6 +15,11 @@ namespace ComputingSystemSimulation
         public double maxTaskWorkTime { get; private set; }
         public double maxFreeMemoryTime { get; private set; }
 
+        //текущее количество свободных ядер
+        public int nowCoresCount { get; set; }
+        //текущее количество свободной памяти
+        public int nowMemoryCount { get; set; }
+
         public CompSystemParams() { }
 
         public bool ReadParamsFromXMLFile()
@@ -28,6 +33,10 @@ namespace ComputingSystemSimulation
                 maxTaskWorkTime = Convert.ToDouble(doc.DocumentElement.ChildNodes[2].InnerText);
                 maxFreeMemoryTime = Convert.ToDouble(doc.DocumentElement.ChildNodes[3].InnerText);
                 reserveCoresCount = Convert.ToInt32(doc.DocumentElement.ChildNodes[4].InnerText);
+
+                nowCoresCount = coresCount;
+                nowMemoryCount = memoryCount;
+
                 return true;
             }
             catch (Exception ex)
@@ -36,5 +45,16 @@ namespace ComputingSystemSimulation
                 return false;
             }
         } 
+
+        //проверка, хватит ли ресурсов на задачу
+        public bool isFreeRes (BaseTask task)
+        {
+            if (task.requiredCores > nowCoresCount
+                || task.requiredMemory > nowMemoryCount)
+                return false;
+            return true;
+        }
+
+
     }
 }
