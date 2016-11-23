@@ -17,6 +17,8 @@ namespace ComputingSystemSimulation
         //очередь задач
         private Queue<BaseTask> tasksQueue = new Queue<BaseTask>();
 
+        private double SystemTime = 0;
+
         public Simulation()
         {
             compSystemParams.ReadParamsFromXMLFile();
@@ -41,7 +43,8 @@ namespace ComputingSystemSimulation
                 Event e = eventsCalendar.GetEvent();
                 string log = Loging.LogCompSys(compSystemParams);
                 log += "\n" + Loging.LogEvent(e as TaskEvent);
-                switch(e.type)
+                SystemTime = e.beginTimestamp; //e.duration;
+                switch (e.type)
                 {
                     case Event.EventTypes.AddTask:
                         tasksQueue.Enqueue(tasks[(e as TaskEvent).taskId]);
@@ -78,9 +81,14 @@ namespace ComputingSystemSimulation
                         break;
                 }
 
+                Loging.WriteLogConsole(log, SystemTime, true);
+                Loging.WriteLogFile(log, SystemTime);
+
                 if (tasksQueue.Count > 0)
                 {
                     BaseTask ts = tasksQueue.Peek();
+
+                    string log_task = Loging.LogTask(ts);
 
                     if (compSystemParams.isFreeRes(ts))
                     {
@@ -91,12 +99,9 @@ namespace ComputingSystemSimulation
                                                );
                         tasksQueue.Dequeue();
                     }
-
+                    Loging.WriteLogConsole(log_task, SystemTime, true);
+                    Loging.WriteLogFile(log_task, SystemTime);
                 }
-                
-                Loging.WriteLogConsole(log, true);
-                Loging.WriteLogFile (log);
-
             }
         }
     }
