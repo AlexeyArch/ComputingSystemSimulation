@@ -9,6 +9,7 @@ namespace ComputingSystemSimulation
     public class PriorityTask : BaseTask
     {
         public double waitTime { get; private set; }
+        public int priority { get; set; }
 
         public PriorityTask(int id,
                             int requiredCores,
@@ -16,10 +17,12 @@ namespace ComputingSystemSimulation
                             double addTime,
                             double workTime,
                             double freeMemoryTime,
-                            double waitTime) 
+                            double waitTime,
+                            int priority) 
         :base(id, requiredCores, requiredMemory, addTime, workTime, freeMemoryTime)
         {
             this.waitTime = waitTime;
+            this.priority = priority;
         }
     }
 }

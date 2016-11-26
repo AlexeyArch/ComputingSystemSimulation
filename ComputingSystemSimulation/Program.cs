@@ -10,9 +10,11 @@ namespace ComputingSystemSimulation
     {
         static void Main(string[] args)
         {
+            bool trace = false;
+            double time = 10;
             Loging.WriteLogFile("", 0, false);
             Simulation simulation = new Simulation();
-            simulation.StartSimulation();
+            simulation.StartSimulation(trace, time);
 
             Console.ReadKey();
         }
