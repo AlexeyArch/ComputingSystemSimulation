@@ -13,10 +13,11 @@ namespace ComputingSystemSimulation
         //календарь событий
         private EventsCalendar eventsCalendar = new EventsCalendar();
         //задачи
-        private Dictionary<int, BaseTask> tasks;
-        //private Dictionary<int, PriorityTask> tasks;
+        //private Dictionary<int, BaseTask> tasks;
+        private Dictionary<int, PriorityTask> tasks;
         //очередь задач
-        private Queue<BaseTask> tasksQueue = new Queue<BaseTask>();
+        //private Queue<BaseTask> tasksQueue = new Queue<BaseTask>();
+        private List<PriorityTask> tasksQueue = new List<PriorityTask>();
 
         private double SystemTime = 0;
         private double MaxTimeInQueue = 0;
@@ -26,7 +27,8 @@ namespace ComputingSystemSimulation
             compSystemParams.ReadParamsFromXMLFile();
 
             //генерируем задачи
-            tasks = EventGenerator.GenerateTasks(compSystemParams, 0.7, 10);
+            //tasks = EventGenerator.GenerateTasks(compSystemParams, 0.7, 10);
+            tasks = PriorityEventGenerator.GenerateTasks(compSystemParams, 0.7, 10);
 
             //добавление события постановки в очередь
             foreach (BaseTask task in tasks.Values)
@@ -49,8 +51,8 @@ namespace ComputingSystemSimulation
                 switch (e.type)
                 {
                     case Event.EventTypes.AddTask:
-                        tasksQueue.Enqueue(tasks[(e as TaskEvent).taskId]);
-                        //tasksQueue
+                        //tasksQueue.Enqueue(tasks[(e as TaskEvent).taskId]);
+                        tasksQueue.Add(tasks[(e as TaskEvent).taskId]);
                         break;
 
                     case Event.EventTypes.BeginComputeTask:
@@ -89,10 +91,11 @@ namespace ComputingSystemSimulation
 
                 Loging.WriteLogConsole(log, SystemTime);
                 Loging.WriteLogFile(log, SystemTime);
-
-                if (tasksQueue.Count > 0)
+                
+                if (tasksQueue.Count() > 0)
                 {
-                    BaseTask ts = tasksQueue.Peek();
+                    //BaseTask ts = tasksQueue.Peek();
+                    PriorityTask ts = tasksQueue[0];
 
                     string log_task = Loging.LogTask(ts);
 
@@ -103,8 +106,29 @@ namespace ComputingSystemSimulation
                                                                 e.beginTimestamp, 
                                                                 e.duration) 
                                                );
-                        tasksQueue.Dequeue(); 
+                        //tasksQueue.Dequeue();
+                        tasksQueue.RemoveAt(0);
+                        
                     }
+
+                    else
+                    {
+                        //tasksQueue[0].priority++;
+                        for(int i = 1; i < tasksQueue.Count(); i++)
+                        {
+                            if (compSystemParams.isFreeRes(tasksQueue[i]))
+                            {
+                                //tasksQueue[i].priority = 0;
+                                Event q = eventsCalendar.GetEvent(tasksQueue[i].addTime);
+                                eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
+                                                                (q as TaskEvent).taskId,
+                                                                e.beginTimestamp,
+                                                                e.duration)
+                                                                );
+                            }
+                        }
+                    }
+
                     if (trace)
                     {
                         Loging.WriteLogConsole(log_task, SystemTime, true);
