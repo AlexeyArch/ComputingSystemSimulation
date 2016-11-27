@@ -111,20 +111,21 @@ namespace ComputingSystemSimulation
                         
                     }
 
-                    else
+                    else if(ts.waitTime < SystemTime - ts.addTime)
                     {
-                        //tasksQueue[0].priority++;
                         for(int i = 1; i < tasksQueue.Count(); i++)
                         {
                             if (compSystemParams.isFreeRes(tasksQueue[i]))
                             {
-                                //tasksQueue[i].priority = 0;
                                 Event q = eventsCalendar.GetEvent(tasksQueue[i].addTime);
                                 eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
-                                                                (q as TaskEvent).taskId,
+                                                                tasksQueue[i].id,
                                                                 e.beginTimestamp,
-                                                                e.duration)
+                                                                q.duration)
                                                                 );
+                                e.beginTimestamp = e.beginTimestamp + q.duration;
+                                eventsCalendar.AddEvent(e);
+                                log_task = Loging.LogTask(tasksQueue[i]);
                             }
                         }
                     }

@@ -38,7 +38,7 @@ namespace ComputingSystemSimulation
 
         public Event GetEvent(double time)
         {
-            for (int i = 1; i < events.Count(); i++)
+            for (int i = 1; i < events.Count; i++)
             {
                 if (events[i].beginTimestamp == time && events[i].type == Event.EventTypes.BeginComputeTask)
                 {

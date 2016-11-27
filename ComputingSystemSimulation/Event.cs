@@ -14,7 +14,7 @@ namespace ComputingSystemSimulation
         }
 
         public EventTypes type { get; private set; }
-        public double beginTimestamp { get; private set; }
+        public double beginTimestamp { get; set; }
         public double duration { get; private set; }
 
         public Event(EventTypes type, double beginTimestamp, double duration)
