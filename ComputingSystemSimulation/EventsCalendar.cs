@@ -36,6 +36,20 @@ namespace ComputingSystemSimulation
             return e; 
         }
 
+        public Event GetEvent(double time)
+        {
+            for (int i = 1; i < events.Count; i++)
+            {
+                if (events[i].beginTimestamp == time && events[i].type == Event.EventTypes.BeginComputeTask)
+                {
+                    Event e = events[i];
+                    events.RemoveAt(i);
+                    return e;
+                }
+            }
+            return events[0];
+        }
+
         public int EventsCount()
         {
             return events.Count;

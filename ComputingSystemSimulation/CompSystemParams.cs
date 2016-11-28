@@ -14,6 +14,7 @@ namespace ComputingSystemSimulation
         public int memoryCount { get; private set; }
         public double maxTaskWorkTime { get; private set; }
         public double maxFreeMemoryTime { get; private set; }
+        public double maxTimeForWait { get; private set; }
 
         //текущее количество свободных ядер
         public int nowCoresCount { get; set; }
@@ -33,6 +34,7 @@ namespace ComputingSystemSimulation
                 maxTaskWorkTime = Convert.ToDouble(doc.DocumentElement.ChildNodes[2].InnerText);
                 maxFreeMemoryTime = Convert.ToDouble(doc.DocumentElement.ChildNodes[3].InnerText);
                 reserveCoresCount = Convert.ToInt32(doc.DocumentElement.ChildNodes[4].InnerText);
+                maxTimeForWait = Convert.ToDouble(doc.DocumentElement.ChildNodes[5].InnerText);
 
                 nowCoresCount = coresCount;
                 nowMemoryCount = memoryCount;

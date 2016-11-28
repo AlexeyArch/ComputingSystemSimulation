@@ -47,7 +47,10 @@
     <Compile Include="Event.cs" />
     <Compile Include="EventGenerator.cs" />
     <Compile Include="EventsCalendar.cs" />
+    <Compile Include="FIFOqueue.cs" />
     <Compile Include="Loging.cs" />
+    <Compile Include="PriorityEventGenerator.cs" />
+    <Compile Include="PriorityQueue.cs" />
     <Compile Include="PriorityTask.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

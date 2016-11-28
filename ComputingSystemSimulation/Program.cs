@@ -10,9 +10,14 @@ namespace ComputingSystemSimulation
     {
         static void Main(string[] args)
         {
-            Loging.WriteLogFile("", false);
-            Simulation simulation = new Simulation();
-            simulation.StartSimulation();
+            bool trace = false;
+            double time = 10;
+            // тип очереди: true - FIFO, false - PriorityQueue
+            bool TypeOfQueue = false;
+
+            Loging.WriteLogFile("", 0, false);
+            Simulation simulation = new Simulation(TypeOfQueue);
+            simulation.StartSimulation(TypeOfQueue, trace, time);
 
             Console.ReadKey();
         }
