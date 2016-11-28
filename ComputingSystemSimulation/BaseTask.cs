@@ -11,7 +11,7 @@ namespace ComputingSystemSimulation
         public int id { get; protected set; }
         public int requiredCores { get; protected set; }
         public int requiredMemory { get; protected set; }
-        public double addTime { get; protected set; }
+        public double addTime { get; set; }
         public double workTime { get; protected set; }
         public double freeMemoryTime { get; protected set; }
 
