@@ -15,7 +15,7 @@ namespace ComputingSystemSimulation
 
         public static void WriteLogConsole( string log, double SystemTime, bool pause = false)
         {
-            Console.WriteLine("[" + SystemTime.ToString("0.000") + "]: " + log);
+            Console.WriteLine("[" + SystemTime.ToString("0.000000") + "]: " + log);
             if (pause) Console.ReadKey();
         }
 
