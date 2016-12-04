@@ -13,7 +13,7 @@ namespace ComputingSystemSimulation
             bool trace = false;
             double time = 1000;
             // тип очереди: true - без приоритета, false - с приоритетом
-            double MaxWaitTime = 0;
+            double MaxWaitTime = 10;
 
             Loging.WriteLogFile("", 0, false);
             Simulation simulation = new Simulation(MaxWaitTime);

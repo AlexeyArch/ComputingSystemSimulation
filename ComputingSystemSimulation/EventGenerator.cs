@@ -12,11 +12,11 @@ namespace ComputingSystemSimulation
         /// <param name="lambda">интерсивность распределения</param>
         /// <param name="timeLimit">при превышении лимита постановка задач прекращается</param>
         /// <returns></returns>
-        public static Dictionary<int, BaseTask> GenerateTasks(CompSystemParams compSystemParams, double lambda, double timeLimit, bool priority = false)
+        public static Dictionary<int, BaseTask> GenerateTasks(CompSystem compSystemParams, double lambda, double timeLimit, bool priority = false)
         {
             Random rand = new Random();
             double time = 0.0;
-            int x = 0;
+            int x = 1;
             Dictionary<int, BaseTask> result = new Dictionary<int, BaseTask>();
             while (time < timeLimit)
             {
