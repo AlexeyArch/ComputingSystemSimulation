@@ -57,6 +57,18 @@ namespace ComputingSystemSimulation
             return true;
         }
 
+        //отнимание ресурсов
+        public void takeRes (int core, int memory)
+        {
+            nowCoresCount -= core;
+            nowMemoryCount -= memory;
+        }
 
+        //отнимание ресурсов
+        public void returnRes(int core, int memory)
+        {
+            nowCoresCount += core;
+            nowMemoryCount += memory;
+        }
     }
 }

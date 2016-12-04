@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ComputingSystemSimulation
 {
@@ -15,7 +12,7 @@ namespace ComputingSystemSimulation
         /// <param name="lambda">интерсивность распределения</param>
         /// <param name="timeLimit">при превышении лимита постановка задач прекращается</param>
         /// <returns></returns>
-        public static Dictionary<int, BaseTask> GenerateTasks(CompSystemParams compSystemParams, double lambda, double timeLimit)
+        public static Dictionary<int, BaseTask> GenerateTasks(CompSystemParams compSystemParams, double lambda, double timeLimit, bool priority = false)
         {
             Random rand = new Random();
             double time = 0.0;
@@ -26,9 +23,10 @@ namespace ComputingSystemSimulation
                 int cores = rand.Next(1, compSystemParams.coresCount);
                 int memory = rand.Next(1, compSystemParams.memoryCount);
                 time += ExponentialDistr(lambda, rand.NextDouble());
-                double workTime = rand.NextDouble() * compSystemParams.maxTaskWorkTime;
+                double workTime =  rand.NextDouble() * compSystemParams.maxTaskWorkTime;
+                double maxWaitTime = (priority)? rand.NextDouble() * compSystemParams.maxTimeForWait: 0;
                 double freeMemoryTime = rand.NextDouble() * compSystemParams.maxFreeMemoryTime;
-                result.Add(x, new BaseTask(x, cores, memory, time, workTime, freeMemoryTime));
+                result.Add(x, new BaseTask(x, cores, memory, time, workTime, freeMemoryTime, maxWaitTime));
                 x++;
             }
 

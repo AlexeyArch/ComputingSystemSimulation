@@ -14,19 +14,22 @@ namespace ComputingSystemSimulation
         public double addTime { get; set; }
         public double workTime { get; protected set; }
         public double freeMemoryTime { get; protected set; }
+        public double waitTime { get; private set; }
 
         public BaseTask(int id,
                         int requiredCores,
                         int requiredMemory,
                         double addTime,
                         double workTime,
-                        double freeMemoryTime)
+                        double freeMemoryTime,
+                        double waitTime)
         {
             this.id = id;
             this.requiredCores = requiredCores;
             this.requiredMemory = requiredMemory;
             this.addTime = addTime;
             this.workTime = workTime;
+            this.waitTime = waitTime;
             this.freeMemoryTime = freeMemoryTime;
         }
     }
