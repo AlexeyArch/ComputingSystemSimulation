@@ -27,7 +27,7 @@ namespace ComputingSystemSimulation
             return log;
         }
 
-        public static string LogCompSys (CompSystemParams csp)
+        public static string LogCompSys (CompSystem csp)
         {
             string log = "State System:  cores = " + csp.nowCoresCount + "(" + csp.coresCount + ")"+ 
                          " memory = " + csp.nowMemoryCount + "(" + csp.memoryCount + ")";

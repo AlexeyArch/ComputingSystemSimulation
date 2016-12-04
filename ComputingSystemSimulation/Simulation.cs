@@ -9,7 +9,7 @@ namespace ComputingSystemSimulation
     public class Simulation
     {
         //параметры ВС
-        private CompSystemParams compSystemParams = new CompSystemParams();
+        private CompSystem compSystem = new CompSystem();
         //календарь событий
         private EventsCalendar eventsCalendar = new EventsCalendar();
         //задачи
@@ -23,10 +23,9 @@ namespace ComputingSystemSimulation
 
         public Simulation(double _MaxTimeWait = 0.0)
         {
-            compSystemParams.ReadParamsFromXMLFile();
             MaxTimeWait = _MaxTimeWait;
             //генерируем задачи
-            tasks = EventGenerator.GenerateTasks(compSystemParams, 0.7, 10, (MaxTimeWait > 0)? true:false);
+            tasks = EventGenerator.GenerateTasks(compSystem, 0.7, 10, (MaxTimeWait > 0)? true:false);
             //добавление события постановки в очередь
             foreach (BaseTask task in tasks.Values)
             {
@@ -42,7 +41,7 @@ namespace ComputingSystemSimulation
             {
                 //получаем текущее событие
                 Event e = eventsCalendar.GetEvent();
-                string log = Loging.LogCompSys(compSystemParams);
+                string log = Loging.LogCompSys(compSystem);
                 log += "\n" + Loging.LogEvent(e as TaskEvent);
 
                 //получаем системное время, относительно текущего события
@@ -63,9 +62,18 @@ namespace ComputingSystemSimulation
                                                                 (e as TaskEvent).taskId,
                                                                 e.beginTimestamp + e.duration,
                                                                 0)
-                                               );
+                                               );                  
                         //уменьшем свободные ресурсы
-                        compSystemParams.takeRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
+                        compSystem.takeRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
+
+                        List<int> freeCores = compSystem.getValueCore(0, tasks[(e as TaskEvent).taskId].requiredCores);
+                        for (int i = 0; i < freeCores.Count(); i++)
+                            compSystem.setValueCore(freeCores[i], (e as TaskEvent).taskId);
+
+                        tasks[(e as TaskEvent).taskId].setCores(freeCores);
+
+
+
                         //считаем время ожидания задачи в очереди
                         if (SystemTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
                             MaxTimeInQueue = SystemTime - tasks[(e as TaskEvent).taskId].addTime;
@@ -83,12 +91,18 @@ namespace ComputingSystemSimulation
                     
                     //событие освобождения памяти
                     case Event.EventTypes.FreeMemory:
-                        //освобождает ресурсы
-                        compSystemParams.returnRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
+                        //освобождает ресурсы                        
+                        compSystem.returnRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
+                        List<int> busyCores = compSystem.getValueCore((e as TaskEvent).taskId);
+                        for (int i = 0; i < busyCores.Count(); i++)
+                            compSystem.setValueCore(busyCores[i], 0);
                         break;
                 }
-
-               // Loging.WriteLogConsole(log, SystemTime, true);
+                log += "\nTask count = " + tasksQueue.Count() + "\n Cores: ";
+                for (int i = 0; i < compSystem.coresCount; i++)
+                    log += compSystem.cores[i] + " ";
+                log += "\n";
+                Loging.WriteLogConsole(log, SystemTime, true);
 
                 //если очередь не пуста
                 if (tasksQueue.Count() > 0)
@@ -98,8 +112,9 @@ namespace ComputingSystemSimulation
                     string log_task = Loging.LogTask(ts);
 
                     //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
-                    if (compSystemParams.isFreeRes(ts))
+                    if (compSystem.isFreeRes(ts))
                     {
+                        Console.WriteLine("\nЗадача из начала очереди");
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
                                                                 ts.id,
                                                                 e.beginTimestamp,
@@ -115,16 +130,18 @@ namespace ComputingSystemSimulation
                             //перебераем последуюущие задачи, пока не найдет ту, которойй хватит ресурсов
                             for (int i = 1; i < tasksQueue.Count(); i++)
                             {
-                                if (compSystemParams.isFreeRes(tasksQueue[i]))
+                                if (compSystem.isFreeRes(tasksQueue[i]))
                                 {
+
+                                    Console.WriteLine("\nЗадача перескочила");
                                     eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
                                                                     tasksQueue[i].id,
                                                                     e.beginTimestamp,
                                                                     tasksQueue[i].workTime)
                                                                     );
+                                    tasksQueue.RemoveAt(i);
 
-
-                                    log_task = Loging.LogTask(tasksQueue[i]);
+                                   
 
                                     break;
                                 }
