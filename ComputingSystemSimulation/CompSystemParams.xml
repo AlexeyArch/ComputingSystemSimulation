@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?> 
 <params>
-  <cores_count>8</cores_count>
+  <cores_count>20</cores_count>
   <memory_count>512</memory_count>
   <max_task_work_time>2</max_task_work_time>
   <max_free_memory_time>2</max_free_memory_time>
