@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.IO;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ComputingSystemSimulation
 {
@@ -43,6 +44,50 @@ namespace ComputingSystemSimulation
                         " \n\t work_time = " + te.workTime.ToString("0.00") +
                         " \n\t free_mem = " + te.freeMemoryTime.ToString("0.00");
             return log;
+        }
+
+        public static void writingInExcMethod(int rows, int cols, int id, double time)
+        {
+            try
+            {
+                string LogOfTasks = Path.GetFullPath("LogOfTasks.xlsx");
+                
+                if (File.Exists(LogOfTasks))
+                {
+                    Excel.Application ObjExcel = new Excel.Application();
+                    Excel.Workbook ObjWorkBook;
+                    Excel.Worksheet ObjWorkSheet;
+
+                    ObjWorkBook = ObjExcel.Workbooks.Open(LogOfTasks);
+                    ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.ActiveSheet;
+                    ObjExcel.Visible = false;
+
+                    ObjWorkSheet.Cells[rows, cols] = id;
+                    ObjWorkSheet.Cells[rows, cols + 1] = time;
+
+                    ObjWorkBook.Save();
+                    ObjWorkBook.Close();
+                    ObjExcel.Quit();
+
+                }
+                else
+                {
+                    Excel.Application ObjExcele = new Excel.Application();
+                    Excel.Workbook Book = ObjExcele.Workbooks.Add(Type.Missing);
+                    Excel.Worksheet Sheet = (Excel.Worksheet)ObjExcele.ActiveSheet;
+
+                    Sheet.Cells[rows, cols] = id;
+                    Sheet.Cells[rows, cols + 1] = time;
+
+                    Sheet.SaveAs(LogOfTasks);
+                    Book.Close();
+                    ObjExcele.Quit();
+                }
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Ошибка при составлении лога\n" + exc.Message);
+            }
         }
     }
 }

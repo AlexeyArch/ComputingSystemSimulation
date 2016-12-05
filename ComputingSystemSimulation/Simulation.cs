@@ -20,6 +20,7 @@ namespace ComputingSystemSimulation
         private double SystemTime = 0;
         private double MaxTimeInQueue = 0;
         private double MaxTimeWait; // максимальное время ожидания задачи в очереди
+        private int rows = 2, cols = 1; // для записи в exel
 
         public Simulation(double _MaxTimeWait = 0.0)
         {
@@ -45,6 +46,8 @@ namespace ComputingSystemSimulation
                 string log = Loging.LogCompSys(compSystemParams);
                 log += "\n" + Loging.LogEvent(e as TaskEvent);
 
+                Loging.WriteLogFile(log, SystemTime);
+
                 //получаем системное время, относительно текущего события
                 SystemTime = e.beginTimestamp;
 
@@ -69,6 +72,18 @@ namespace ComputingSystemSimulation
                         //считаем время ожидания задачи в очереди
                         if (SystemTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
                             MaxTimeInQueue = SystemTime - tasks[(e as TaskEvent).taskId].addTime;
+
+                        //запись в excel файл времени пибывания в очереди
+                        Loging.writingInExcMethod(rows, cols, tasks[(e as TaskEvent).taskId].id, SystemTime - tasks[(e as TaskEvent).taskId].addTime);
+                        rows++;
+
+                        //запись лога в файл
+                        string log_task = Loging.LogTask(tasks[(e as TaskEvent).taskId]);
+                        Loging.WriteLogFile(log_task, SystemTime);
+
+                        string SizeOfQueue = "Size of queue = " + tasksQueue.Count().ToString();
+                        Loging.WriteLogFile(SizeOfQueue, SystemTime); 
+
                         break;
 
                     //событие конца счета
@@ -136,7 +151,7 @@ namespace ComputingSystemSimulation
                     {
                         Loging.WriteLogConsole(log_task, SystemTime, true);
                     }
-                    Loging.WriteLogFile(log_task, SystemTime);
+                    
                 }
 
                 //выход из цикла при ограничении по времени
