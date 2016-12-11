@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace ComputingSystemSimulation
@@ -52,7 +51,7 @@ namespace ComputingSystemSimulation
             return res;
         }
 
-        public void setValueCore(int index, int value)
+        private void setValueCore(int index, int value)
         {
             cores[index] = value;
         }
@@ -101,17 +100,27 @@ namespace ComputingSystemSimulation
         }
 
         //отнимание ресурсов
-        public void takeRes(int core, int memory)
+        public void takeRes(BaseTask task)
         {
-            nowCoresCount -= core;
-            nowMemoryCount -= memory;
+            nowCoresCount -= task.requiredCores;
+            nowMemoryCount -= task.requiredMemory;
+
+            List<int> freeCores = getValueCore(0, task.requiredCores);
+            for (int i = 0; i < freeCores.Count(); i++)
+                setValueCore(freeCores[i], task.id);
+
+            task.setCores(freeCores);
         }
 
         //возврат ресурсов
-        public void returnRes(int core, int memory)
+        public void returnRes(BaseTask task)
         {
-            nowCoresCount += core;
-            nowMemoryCount += memory;
+            nowCoresCount += task.requiredCores;
+            nowMemoryCount += task.requiredMemory;
+
+            List<int> busyCores = getValueCore(task.id);
+            for (int i = 0; i < busyCores.Count(); i++)
+                setValueCore(busyCores[i], 0);
         }
     }
 }

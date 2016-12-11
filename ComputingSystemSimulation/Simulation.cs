@@ -17,7 +17,6 @@ namespace ComputingSystemSimulation
         //очередь задач
         private List<BaseTask> tasksQueue = new List<BaseTask>();
 
-        private double SystemTime = 0;
         private double MaxTimeInQueue = 0;
 
         public Simulation()
@@ -32,6 +31,24 @@ namespace ComputingSystemSimulation
             }
         }
 
+        private bool AddBeginComputeTaskEvent(BaseTask task, double beginTimestamp, int index)
+        {
+            //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
+            if (compSystem.isFreeRes(task))
+            {
+                eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
+                                                                  task.id,
+                                                                  beginTimestamp,
+                                                                  task.workTime)
+                                       );
+                tasksQueue.RemoveAt(0);
+                return true;
+            }
+            else
+                return false;
+
+        }
+
         public void StartSimulation(bool trace = false)
         {
             //до тех пор, пока в календаре событий есть события
@@ -39,48 +56,45 @@ namespace ComputingSystemSimulation
             {
                 //получаем текущее событие
                 Event e = eventsCalendar.GetEvent();
+                //получаем системное время, относительно текущего события
+                double SystemTime = e.beginTimestamp;
+                int taskId = (e as TaskEvent).taskId;
+
+                #region Log
                 string log = Loging.LogCompSys(compSystem);
                 log += "\n" + Loging.LogEvent(e as TaskEvent);
-
-                //получаем системное время, относительно текущего события
-                SystemTime = e.beginTimestamp;
+                #endregion
 
                 switch (e.type)
                 {
                     //событи добавление задачи в очередь
                     case Event.EventTypes.AddTask:
                         //добавляем задачу в очередь
-                        tasksQueue.Add(tasks[(e as TaskEvent).taskId]);
+                        tasksQueue.Add(tasks[taskId]);
                         break;
 
                     //событие начала счета задачи
                     case Event.EventTypes.BeginComputeTask:
                         //добавляем событие конца счета
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
-                                                              (e as TaskEvent).taskId,
+                                                              taskId,
                                                               e.beginTimestamp + e.duration,
                                                               0)
                                                );                  
-                        //уменьшем свободные ресурсы
-                        compSystem.takeRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
-
-                        List<int> freeCores = compSystem.getValueCore(0, tasks[(e as TaskEvent).taskId].requiredCores);
-                        for (int i = 0; i < freeCores.Count(); i++)
-                            compSystem.setValueCore(freeCores[i], (e as TaskEvent).taskId);
-
-                        tasks[(e as TaskEvent).taskId].setCores(freeCores);
+                        //уменьшаем свободные ресурсы
+                        compSystem.takeRes(tasks[taskId]);
 
                         //считаем время ожидания задачи в очереди
-                        if (SystemTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
-                            MaxTimeInQueue = SystemTime - tasks[(e as TaskEvent).taskId].addTime;
+                        if (SystemTime - tasks[taskId].addTime > MaxTimeInQueue)
+                            MaxTimeInQueue = SystemTime - tasks[taskId].addTime;
                         break;
 
                     //событие конца счета
                     case Event.EventTypes.EndComputeTask:
                         //добавления события в календарь освобождения памяти, т.е. событие, которое произойдет когда освободится память
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
-                                                              (e as TaskEvent).taskId,
-                                                              e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
+                                                              taskId,
+                                                              e.beginTimestamp + tasks[taskId].freeMemoryTime,
                                                               0)
                                                );
                         break;
@@ -88,69 +102,53 @@ namespace ComputingSystemSimulation
                     //событие освобождения памяти
                     case Event.EventTypes.FreeMemory:
                         //освобождает ресурсы                        
-                        compSystem.returnRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
-                        List<int> busyCores = compSystem.getValueCore((e as TaskEvent).taskId);
-                        for (int i = 0; i < busyCores.Count(); i++)
-                            compSystem.setValueCore(busyCores[i], 0);
+                        compSystem.returnRes(tasks[taskId]);
                         break;
                 }
+
+                #region Log
                 log += "\nTask count = " + tasksQueue.Count() + "\n Cores: ";
                 for (int i = 0; i < compSystem.coresCount; i++)
                     log += compSystem.cores[i] + " ";
                 log += "\n";
                 Loging.WriteLogConsole(log, SystemTime, true);
+                #endregion
 
                 //если очередь не пуста
                 if (tasksQueue.Count() > 0)
                 {
                     //получаем первую задачу из очереди
                     BaseTask ts = tasksQueue[0];
-                    string log_task = Loging.LogTask(ts);
 
-                    //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
-                    if (compSystem.isFreeRes(ts))
-                    {
+                        
+                    if (AddBeginComputeTaskEvent(ts, e.beginTimestamp, 0))
                         Console.WriteLine("\nЗадача из начала очереди");
-                        eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
-                                                              ts.id,
-                                                              e.beginTimestamp,
-                                                              ts.workTime)
-                                               );
-                        tasksQueue.RemoveAt(0);
-                    }
                     else //если ресусов для первой задачи не хватает
                     {
                         //если моделирование с перескоком задач, то проверяем, сколько по времени первая задача уже ожидает в очереди
                         //if (ts.waitTime>0 && (ts.waitTime < SystemTime - ts.addTime))
                         if (compSystem.maxTimeForWait > 0 && (compSystem.maxTimeForWait < SystemTime - ts.addTime))
                         {
-                            //перебераем последуюущие задачи, пока не найдет ту, которойй хватит ресурсов
+                            //перебераем последуюущие задачи, пока не найдет ту, которой хватит ресурсов
                             for (int i = 1; i < tasksQueue.Count(); i++)
                             {
-                                if (compSystem.isFreeRes(tasksQueue[i]))
+                                if (AddBeginComputeTaskEvent(tasksQueue[i], e.beginTimestamp, i))
                                 {
-
                                     Console.WriteLine("\nЗадача перескочила");
-                                    eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
-                                                                    tasksQueue[i].id,
-                                                                    e.beginTimestamp,
-                                                                    tasksQueue[i].workTime)
-                                                                    );
-                                    tasksQueue.RemoveAt(i);
-
-                                   
-
                                     break;
                                 }
                             }
                         }
                     }
 
+                    #region Log
+                    string log_task = Loging.LogTask(ts);
                     if (trace)
                     {
                         Loging.WriteLogConsole(log_task, SystemTime, true);
                     }
                     Loging.WriteLogFile(log_task, SystemTime);
+                    #endregion
                 }
 
                 //выход из цикла при ограничении по времени
@@ -158,7 +156,6 @@ namespace ComputingSystemSimulation
             }
 
             Console.WriteLine("MaxTimeInQueue = " + MaxTimeInQueue.ToString("0.000"));
-
         }
     }
 }
