@@ -127,6 +127,7 @@ namespace ComputingSystemSimulation
                     continue;
 
                 BaseTask ts = tasksQueue[0];
+
                 if (TryAddBeginComputeTaskEvent(ts, e.beginTimestamp, 0))
                 {
                     Console.WriteLine("\nЗадача из начала очереди");
