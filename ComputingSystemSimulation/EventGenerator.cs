@@ -8,24 +8,24 @@ namespace ComputingSystemSimulation
         /// <summary>
         /// Генератор задач
         /// </summary>
-        /// <param name="compSystemParams">параметры ВС</param>
+        /// <param name="compSystem">параметры ВС</param>
         /// <param name="lambda">интерсивность распределения</param>
         /// <param name="timeLimit">при превышении лимита постановка задач прекращается</param>
         /// <returns></returns>
-        public static Dictionary<int, BaseTask> GenerateTasks(CompSystemParams compSystemParams, double lambda, double timeLimit, bool priority = false)
+        public static Dictionary<int, BaseTask> GenerateTasks(CompSystem compSystem)
         {
             Random rand = new Random();
             double time = 0.0;
-            int x = 0;
+            int x = 1;
             Dictionary<int, BaseTask> result = new Dictionary<int, BaseTask>();
-            while (time < timeLimit)
+            while (time < compSystem.simulationTimeLimit)
             {
-                int cores = rand.Next(1, compSystemParams.coresCount);
-                int memory = rand.Next(1, compSystemParams.memoryCount);
-                time += ExponentialDistr(lambda, rand.NextDouble());
-                double workTime =  rand.NextDouble() * compSystemParams.maxTaskWorkTime;
-                double maxWaitTime = (priority)? rand.NextDouble() * compSystemParams.maxTimeForWait: 0;
-                double freeMemoryTime = rand.NextDouble() * compSystemParams.maxFreeMemoryTime;
+                int cores = rand.Next(1, compSystem.maxTaskCoresCount);
+                int memory = rand.Next(1, compSystem.maxTaskMemoryCount);
+                time += ExponentialDistr(compSystem.supplyIntensity, rand.NextDouble());
+                double workTime = ExponentialDistr(compSystem.workIntensity, rand.NextDouble());
+                double maxWaitTime = (compSystem.priority) ? rand.NextDouble() * compSystem.maxTimeForWait : 0;
+                double freeMemoryTime = workTime * compSystem.freeMemoryTimeRatio;
                 result.Add(x, new BaseTask(x, cores, memory, time, workTime, freeMemoryTime, maxWaitTime));
                 x++;
             }

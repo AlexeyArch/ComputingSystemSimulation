@@ -11,13 +11,10 @@ namespace ComputingSystemSimulation
         static void Main(string[] args)
         {
             bool trace = false;
-            double time = 1000;
-            // тип очереди: true - без приоритета, false - с приоритетом
-            double MaxWaitTime = 0;
 
             Loging.WriteLogFile("", 0, false);
-            Simulation simulation = new Simulation(MaxWaitTime);
-            simulation.StartSimulation(trace, time);
+            Simulation simulation = new Simulation();
+            simulation.StartSimulation(trace);
 
             Console.ReadKey();
         }

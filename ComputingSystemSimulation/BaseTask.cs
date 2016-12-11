@@ -16,6 +16,8 @@ namespace ComputingSystemSimulation
         public double freeMemoryTime { get; protected set; }
         public double waitTime { get; private set; }
 
+        public List<int> coresNum { get; private set; }
+
         public BaseTask(int id,
                         int requiredCores,
                         int requiredMemory,
@@ -31,6 +33,11 @@ namespace ComputingSystemSimulation
             this.workTime = workTime;
             this.waitTime = waitTime;
             this.freeMemoryTime = freeMemoryTime;
+        }
+
+        public void setCores(List<int> list)
+        {
+            coresNum = new List<int>(list);
         }
     }
 }

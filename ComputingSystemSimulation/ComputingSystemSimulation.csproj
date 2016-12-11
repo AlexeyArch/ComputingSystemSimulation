@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompSystemParams.cs" />
+    <Compile Include="CompSystem.cs" />
     <Compile Include="Event.cs" />
     <Compile Include="EventGenerator.cs" />
     <Compile Include="EventsCalendar.cs" />
