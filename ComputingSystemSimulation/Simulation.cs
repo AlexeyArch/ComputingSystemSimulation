@@ -32,7 +32,7 @@ namespace ComputingSystemSimulation
             }
         }
 
-        public void StartSimulation(bool trace = false,  double time = 100)
+        public void StartSimulation(bool trace = false)
         {
             //до тех пор, пока в календаре событий есть события
             while (eventsCalendar.EventsCount() > 0)
@@ -49,17 +49,17 @@ namespace ComputingSystemSimulation
                 {
                     //событи добавление задачи в очередь
                     case Event.EventTypes.AddTask:
-                            //добавляем задачу в очередь
-                            tasksQueue.Add(tasks[(e as TaskEvent).taskId]);
+                        //добавляем задачу в очередь
+                        tasksQueue.Add(tasks[(e as TaskEvent).taskId]);
                         break;
 
                     //событие начала счета задачи
                     case Event.EventTypes.BeginComputeTask:
                         //добавляем событие конца счета
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
-                                                                (e as TaskEvent).taskId,
-                                                                e.beginTimestamp + e.duration,
-                                                                0)
+                                                              (e as TaskEvent).taskId,
+                                                              e.beginTimestamp + e.duration,
+                                                              0)
                                                );                  
                         //уменьшем свободные ресурсы
                         compSystem.takeRes(tasks[(e as TaskEvent).taskId].requiredCores, tasks[(e as TaskEvent).taskId].requiredMemory);
@@ -70,8 +70,6 @@ namespace ComputingSystemSimulation
 
                         tasks[(e as TaskEvent).taskId].setCores(freeCores);
 
-
-
                         //считаем время ожидания задачи в очереди
                         if (SystemTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
                             MaxTimeInQueue = SystemTime - tasks[(e as TaskEvent).taskId].addTime;
@@ -81,10 +79,10 @@ namespace ComputingSystemSimulation
                     case Event.EventTypes.EndComputeTask:
                         //добавления события в календарь освобождения памяти, т.е. событие, которое произойдет когда освободится память
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
-                                                                    (e as TaskEvent).taskId,
-                                                                    e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
-                                                                    0)
-                                                   );
+                                                              (e as TaskEvent).taskId,
+                                                              e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
+                                                              0)
+                                               );
                         break;
                     
                     //событие освобождения памяти
@@ -114,12 +112,13 @@ namespace ComputingSystemSimulation
                     {
                         Console.WriteLine("\nЗадача из начала очереди");
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
-                                                                ts.id,
-                                                                e.beginTimestamp,
-                                                                ts.workTime)
+                                                              ts.id,
+                                                              e.beginTimestamp,
+                                                              ts.workTime)
                                                );
                         tasksQueue.RemoveAt(0);
-                    } else //если ресусов для первой задачи не хватает
+                    }
+                    else //если ресусов для первой задачи не хватает
                     {
                         //если моделирование с перескоком задач, то проверяем, сколько по времени первая задача уже ожидает в очереди
                         //if (ts.waitTime>0 && (ts.waitTime < SystemTime - ts.addTime))
@@ -155,7 +154,7 @@ namespace ComputingSystemSimulation
                 }
 
                 //выход из цикла при ограничении по времени
-                if (SystemTime >= time) break;
+                if (SystemTime >= compSystem.simulationTimeLimit) break;
             }
 
             Console.WriteLine("MaxTimeInQueue = " + MaxTimeInQueue.ToString("0.000"));
