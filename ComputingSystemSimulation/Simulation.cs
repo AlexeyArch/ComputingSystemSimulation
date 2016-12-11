@@ -31,7 +31,7 @@ namespace ComputingSystemSimulation
             }
         }
 
-        private bool AddBeginComputeTaskEvent(BaseTask task, double beginTimestamp, int index)
+        private bool TryAddBeginComputeTaskEvent(BaseTask task, double beginTimestamp, int index)
         {
             //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
             if (compSystem.isFreeRes(task))
@@ -41,7 +41,7 @@ namespace ComputingSystemSimulation
                                                                   beginTimestamp,
                                                                   task.workTime)
                                        );
-                tasksQueue.RemoveAt(0);
+                tasksQueue.RemoveAt(index);
                 return true;
             }
             else
@@ -114,7 +114,6 @@ namespace ComputingSystemSimulation
                     #endregion
                 }
 
-
                 #region Log
                 log += "\nTask count = " + tasksQueue.Count() + "\n Cores: ";
                 for (int i = 0; i < compSystem.coresCount; i++)
@@ -124,42 +123,38 @@ namespace ComputingSystemSimulation
                 #endregion
 
                 //если очередь не пуста
-                if (tasksQueue.Count() > 0)
-                {
-                    //получаем первую задачу из очереди
-                    BaseTask ts = tasksQueue[0];
+                if (tasksQueue.Count() == 0)
+                    continue;
 
-                        
-                    if (AddBeginComputeTaskEvent(ts, e.beginTimestamp, 0))
-                        Console.WriteLine("\nЗадача из начала очереди");
-                    else //если ресусов для первой задачи не хватает
+                BaseTask ts = tasksQueue[0];
+                if (TryAddBeginComputeTaskEvent(ts, e.beginTimestamp, 0))
+                {
+                    Console.WriteLine("\nЗадача из начала очереди");
+                    continue;
+                }
+  
+                //если моделирование с перескоком задач, то проверяем, сколько по времени первая задача уже ожидает в очереди
+                //if (ts.waitTime>0 && (ts.waitTime < SystemTime - ts.addTime))
+                if (compSystem.maxTimeForWait > 0 && (compSystem.maxTimeForWait < currentTime - ts.addTime))
+                {
+                    //перебераем последуюущие задачи, пока не найдет ту, которой хватит ресурсов
+                    for (int i = 1; i < tasksQueue.Count(); i++)
                     {
-                        //если моделирование с перескоком задач, то проверяем, сколько по времени первая задача уже ожидает в очереди
-                        //if (ts.waitTime>0 && (ts.waitTime < SystemTime - ts.addTime))
-                        if (compSystem.maxTimeForWait > 0 && (compSystem.maxTimeForWait < currentTime - ts.addTime))
+                        if (TryAddBeginComputeTaskEvent(tasksQueue[i], e.beginTimestamp, i))
                         {
-                            //перебераем последуюущие задачи, пока не найдет ту, которой хватит ресурсов
-                            for (int i = 1; i < tasksQueue.Count(); i++)
-                            {
-                                if (AddBeginComputeTaskEvent(tasksQueue[i], e.beginTimestamp, i))
-                                {
-                                    Console.WriteLine("\nЗадача перескочила");
-                                    break;
-                                }
-                            }
+                            Console.WriteLine("\nЗадача перескочила");
+                            break;
                         }
                     }
-
-                    #region Log
-                    string log_task = Loging.LogTask(ts);
-                    if (trace)
-                    {
-                        Loging.WriteLogConsole(log_task, currentTime, true);
-                    }
-                    Loging.WriteLogFile(log_task, currentTime);
-                    #endregion
                 }
-
+                    
+                #region Log
+                string log_task = Loging.LogTask(ts);
+                if (trace)
+                    Loging.WriteLogConsole(log_task, currentTime, true);
+                Loging.WriteLogFile(log_task, currentTime);
+                #endregion
+                
                 //выход из цикла при ограничении по времени
                 if (currentTime >= compSystem.simulationTimeLimit) break;
             }
