@@ -19,13 +19,11 @@ namespace ComputingSystemSimulation
 
         private double SystemTime = 0;
         private double MaxTimeInQueue = 0;
-        private double MaxTimeWait; // максимальное время ожидания задачи в очереди
 
-        public Simulation(double _MaxTimeWait = 0.0)
+        public Simulation()
         {
-            MaxTimeWait = _MaxTimeWait;
             //генерируем задачи
-            tasks = EventGenerator.GenerateTasks(compSystem, 0.7, 10, (MaxTimeWait > 0)? true:false);
+            tasks = EventGenerator.GenerateTasks(compSystem);
             //добавление события постановки в очередь
             foreach (BaseTask task in tasks.Values)
             {
@@ -125,7 +123,7 @@ namespace ComputingSystemSimulation
                     {
                         //если моделирование с перескоком задач, то проверяем, сколько по времени первая задача уже ожидает в очереди
                         //if (ts.waitTime>0 && (ts.waitTime < SystemTime - ts.addTime))
-                        if (MaxTimeWait > 0 && (MaxTimeWait < SystemTime - ts.addTime))
+                        if (compSystem.maxTimeForWait > 0 && (compSystem.maxTimeForWait < SystemTime - ts.addTime))
                         {
                             //перебераем последуюущие задачи, пока не найдет ту, которойй хватит ресурсов
                             for (int i = 1; i < tasksQueue.Count(); i++)
