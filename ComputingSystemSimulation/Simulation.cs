@@ -29,12 +29,17 @@ namespace ComputingSystemSimulation
                TaskEvent te = new TaskEvent(Event.EventTypes.AddTask, task.id, task.addTime, task.workTime);
                eventsCalendar.AddEvent(te);
             }
+
+            //генерируем отказы
+            List<CrashEvent> crashes = EventGenerator.GenerateCrashes(compSystem);
+            foreach (CrashEvent crash in crashes)
+                eventsCalendar.AddEvent(crash);
         }
 
         private bool TryAddBeginComputeTaskEvent(BaseTask task, double beginTimestamp, int index)
         {
             //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
-            if (compSystem.isFreeRes(task))
+            if (compSystem.IsFreeRes(task))
             {
                 eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
                                                                   task.id,
@@ -85,7 +90,7 @@ namespace ComputingSystemSimulation
                                                               0)
                                                );                  
                         //уменьшаем свободные ресурсы
-                        compSystem.takeRes(tasks[taskId]);
+                        compSystem.TakeRes(tasks[taskId]);
 
                         //считаем время ожидания задачи в очереди
                         if (currentTime - tasks[taskId].addTime > MaxTimeInQueue)
@@ -109,15 +114,33 @@ namespace ComputingSystemSimulation
                     //событие освобождения памяти
                     case Event.EventTypes.FreeMemory:
                         //освобождает ресурсы                        
-                        compSystem.returnRes(tasks[taskId]);
+                        compSystem.ReturnRes(tasks[taskId]);
                         break;
                     #endregion
+
+                    #region CrashCore
+                    //событие поломки ядра
+                    case Event.EventTypes.CrashCore:
+                        int coreId = compSystem.CrashCore();
+                        eventsCalendar.AddEvent(new RecoveryEvent(coreId,
+                                                                  e.beginTimestamp +
+                                                                  Utils.ExponentialDistr(compSystem.recoveryIntensity,
+                                                                                         new Random().NextDouble())));
+                        break;
+                    #endregion
+
+                    #region RecoveryCore
+                    //событие поломки ядра
+                    case Event.EventTypes.RecoveryCore:
+                        compSystem.RecoveryCore((e as RecoveryEvent).coreId);
+                        break;
+                        #endregion
                 }
 
                 #region Log
                 log += "\nTask count = " + tasksQueue.Count() + "\n Cores: ";
                 for (int i = 0; i < compSystem.coresCount; i++)
-                    log += compSystem.cores[i] + " ";
+                    log += compSystem.workingCores[i] + " ";
                 log += "\n";
                 Loging.WriteLogConsole(log, currentTime, true);
                 #endregion
@@ -155,9 +178,6 @@ namespace ComputingSystemSimulation
                     Loging.WriteLogConsole(log_task, currentTime, true);
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
-                
-                //выход из цикла при ограничении по времени
-                if (currentTime >= compSystem.simulationTimeLimit) break;
             }
 
             Console.WriteLine("MaxTimeInQueue = " + MaxTimeInQueue.ToString("0.000"));
