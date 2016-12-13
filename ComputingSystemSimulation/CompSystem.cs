@@ -163,7 +163,7 @@ namespace ComputingSystemSimulation
         public int CrashCore()
         {
             Random rand = new Random();
-            int coreIndex = rand.Next(0, coresCount - 1);
+            int coreIndex = rand.Next(0, workingCores.Count() - 1);
             Core core = workingCores[coreIndex];
             workingCores.RemoveAt(coreIndex);
             if (!core.busy)

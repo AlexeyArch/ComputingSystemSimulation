@@ -23,5 +23,10 @@ namespace ComputingSystemSimulation
             this.beginTimestamp = beginTimestamp;
             this.duration = duration;
         }
+
+        public virtual string LogEvent()
+        {
+            return string.Empty;
+        }
     }
 }
