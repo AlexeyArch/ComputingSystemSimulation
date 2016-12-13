@@ -16,5 +16,13 @@ namespace ComputingSystemSimulation
         {
             this.taskId = taskId;
         }
+
+        public override string LogEvent()
+        {
+            string log = type.ToString() + ": \n\t id = " + taskId +
+                            " \n\t begin_time = " + beginTimestamp.ToString("0.0000") +
+                            " \n\t duration_time = " + duration.ToString("0.0000");
+            return log;
+        }
     }
 }

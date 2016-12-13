@@ -11,7 +11,8 @@
   <crash_intensity>0,01</crash_intensity>
   <recovery_intensity>0,1</recovery_intensity>
   <reserve_cores_count>2</reserve_cores_count>
-  <max_time_for_wait>4</max_time_for_wait>
-  <simulation_time_limit>50</simulation_time_limit>
+  <max_time_for_wait>0</max_time_for_wait>
+  <simulation_time_limit>1000</simulation_time_limit>
   <priority>true</priority>
+  <crash_begin_timestamp>25</crash_begin_timestamp>
 </params>

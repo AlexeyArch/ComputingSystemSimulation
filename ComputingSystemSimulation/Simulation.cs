@@ -29,12 +29,17 @@ namespace ComputingSystemSimulation
                TaskEvent te = new TaskEvent(Event.EventTypes.AddTask, task.id, task.addTime, task.workTime);
                eventsCalendar.AddEvent(te);
             }
+
+            //генерируем отказы
+            List<CrashEvent> crashes = EventGenerator.GenerateCrashes(compSystem);
+            foreach (CrashEvent crash in crashes)
+                eventsCalendar.AddEvent(crash);
         }
 
         private bool TryAddBeginComputeTaskEvent(BaseTask task, double beginTimestamp, int index)
         {
             //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
-            if (compSystem.isFreeRes(task))
+            if (compSystem.IsFreeRes(task))
             {
                 eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
                                                                   task.id,
@@ -58,11 +63,10 @@ namespace ComputingSystemSimulation
                 Event e = eventsCalendar.GetEvent();
                 //получаем время относительно текущего события
                 double currentTime = e.beginTimestamp;
-                int taskId = (e as TaskEvent).taskId;
 
                 #region Log
                 string log = Loging.LogCompSys(compSystem);
-                log += "\n" + Loging.LogEvent(e as TaskEvent);
+                log += "\n" + e.LogEvent();
                 #endregion
 
                 switch (e.type)
@@ -71,7 +75,7 @@ namespace ComputingSystemSimulation
                     //событие добавление задачи в очередь
                     case Event.EventTypes.AddTask:
                         //добавляем задачу в очередь
-                        tasksQueue.Add(tasks[taskId]);
+                        tasksQueue.Add(tasks[(e as TaskEvent).taskId]);
                         break;
                     #endregion
 
@@ -80,16 +84,16 @@ namespace ComputingSystemSimulation
                     case Event.EventTypes.BeginComputeTask:
                         //добавляем событие конца счета
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
-                                                              taskId,
+                                                              (e as TaskEvent).taskId,
                                                               e.beginTimestamp + e.duration,
                                                               0)
                                                );                  
                         //уменьшаем свободные ресурсы
-                        compSystem.takeRes(tasks[taskId]);
+                        compSystem.TakeRes(tasks[(e as TaskEvent).taskId]);
 
                         //считаем время ожидания задачи в очереди
-                        if (currentTime - tasks[taskId].addTime > MaxTimeInQueue)
-                            MaxTimeInQueue = currentTime - tasks[taskId].addTime;
+                        if (currentTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
+                            MaxTimeInQueue = currentTime - tasks[(e as TaskEvent).taskId].addTime;
                         break;
                     #endregion
 
@@ -98,8 +102,8 @@ namespace ComputingSystemSimulation
                     case Event.EventTypes.EndComputeTask:
                         //добавления события в календарь освобождения памяти, т.е. событие, которое произойдет когда освободится память
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
-                                                              taskId,
-                                                              e.beginTimestamp + tasks[taskId].freeMemoryTime,
+                                                              (e as TaskEvent).taskId,
+                                                              e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
                                                               0)
                                                );
                         break;
@@ -109,15 +113,35 @@ namespace ComputingSystemSimulation
                     //событие освобождения памяти
                     case Event.EventTypes.FreeMemory:
                         //освобождает ресурсы                        
-                        compSystem.returnRes(tasks[taskId]);
+                        compSystem.ReturnRes(tasks[(e as TaskEvent).taskId]);
                         break;
                     #endregion
+
+                    #region CrashCore
+                    //событие поломки ядра
+                    case Event.EventTypes.CrashCore:
+                        Console.WriteLine("\nПоломка");
+                        int coreId = compSystem.CrashCore();
+                        eventsCalendar.AddEvent(new RecoveryEvent(coreId,
+                                                                  e.beginTimestamp +
+                                                                  Utils.ExponentialDistr(compSystem.recoveryIntensity,
+                                                                                         new Random().NextDouble())));
+                        break;
+                    #endregion
+
+                    #region RecoveryCore
+                    //событие поломки ядра
+                    case Event.EventTypes.RecoveryCore:
+                        Console.WriteLine("\nВосстановление");
+                        compSystem.RecoveryCore((e as RecoveryEvent).coreId);
+                        break;
+                        #endregion
                 }
 
                 #region Log
                 log += "\nTask count = " + tasksQueue.Count() + "\n Cores: ";
-                for (int i = 0; i < compSystem.coresCount; i++)
-                    log += compSystem.cores[i] + " ";
+                foreach (CompSystem.Core core in compSystem.workingCores)
+                    log += core.ToString() + " ";
                 log += "\n";
                 Loging.WriteLogConsole(log, currentTime, true);
                 #endregion
@@ -155,9 +179,6 @@ namespace ComputingSystemSimulation
                     Loging.WriteLogConsole(log_task, currentTime, true);
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
-                
-                //выход из цикла при ограничении по времени
-                if (currentTime >= compSystem.simulationTimeLimit) break;
             }
 
             Console.WriteLine("MaxTimeInQueue = " + MaxTimeInQueue.ToString("0.000"));

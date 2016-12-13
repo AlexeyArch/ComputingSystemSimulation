@@ -10,7 +10,7 @@ namespace ComputingSystemSimulation
     {
         public enum EventTypes
         {
-            AddTask, BeginComputeTask, EndComputeTask, FreeMemory
+            AddTask, BeginComputeTask, EndComputeTask, FreeMemory, CrashCore, RecoveryCore
         }
 
         public EventTypes type { get; private set; }
@@ -22,6 +22,11 @@ namespace ComputingSystemSimulation
             this.type = type;
             this.beginTimestamp = beginTimestamp;
             this.duration = duration;
+        }
+
+        public virtual string LogEvent()
+        {
+            return string.Empty;
         }
     }
 }

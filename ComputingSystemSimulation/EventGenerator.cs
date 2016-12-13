@@ -22,10 +22,11 @@ namespace ComputingSystemSimulation
             {
                 int cores = rand.Next(1, compSystem.maxTaskCoresCount);
                 int memory = rand.Next(1, compSystem.maxTaskMemoryCount);
-                time += ExponentialDistr(compSystem.supplyIntensity, rand.NextDouble());
-                double workTime = ExponentialDistr(compSystem.workIntensity, rand.NextDouble());
+                double interval = Utils.ExponentialDistr(compSystem.supplyIntensity, rand.NextDouble());
+                double workTime = Utils.ExponentialDistr(compSystem.workIntensity, rand.NextDouble());
                 double maxWaitTime = (compSystem.priority) ? rand.NextDouble() * compSystem.maxTimeForWait : 0;
                 double freeMemoryTime = workTime * compSystem.freeMemoryTimeRatio;
+                time += interval;
                 result.Add(x, new BaseTask(x, cores, memory, time, workTime, freeMemoryTime, maxWaitTime));
                 x++;
             }
@@ -33,10 +34,19 @@ namespace ComputingSystemSimulation
             return result;
         }
 
-        private static double ExponentialDistr(double lambda, double x)
+        public static List<CrashEvent> GenerateCrashes(CompSystem compSystem)
         {
-            //return 1 - Math.Exp(-lambda * x);
-            return -Math.Log(x) / lambda;
+            Random rand = new Random();
+            double time = compSystem.crashBeginTimestamp;
+            List<CrashEvent> result = new List<CrashEvent>();
+            while (time < compSystem.simulationTimeLimit)
+            {
+                double interval = Utils.ExponentialDistr(compSystem.crashIntensity, rand.NextDouble());
+                time += interval;
+                result.Add(new CrashEvent(time));
+            }
+
+            return result;
         }
     }
 }

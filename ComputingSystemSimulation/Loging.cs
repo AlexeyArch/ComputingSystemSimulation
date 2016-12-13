@@ -20,17 +20,11 @@ namespace ComputingSystemSimulation
             if (pause) Console.ReadKey();
         }
 
-        public static string LogEvent (TaskEvent te)
-        {
-            string log = te.type.ToString() + ": \n\t id = " + te.taskId + 
-                        " \n\t begin_time = " + te.beginTimestamp.ToString("0.0000") + 
-                        " \n\t duration_time = " + te.duration.ToString("0.0000");
-            return log;
-        }
+       
 
         public static string LogCompSys (CompSystem csp)
         {
-            string log = "State System:  cores = " + csp.nowCoresCount + "(" + csp.coresCount + ")"+ 
+            string log = "State System:  cores = " + csp.nowCoresCount + "(" + csp.workingCores.Count + ")"+ 
                          " memory = " + csp.nowMemoryCount + "(" + csp.memoryCount + ")";
             return log;
         }
