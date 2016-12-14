@@ -121,8 +121,8 @@ namespace ComputingSystemSimulation
                     #region CrashCore
                     //событие поломки ядра
                     case Event.EventTypes.CrashCore:
-                        Console.WriteLine("\nПоломка");
                         int coreId = compSystem.CrashCore();
+                        Console.WriteLine("\nПоломка ядра " + coreId.ToString());
                         eventsCalendar.AddEvent(new RecoveryEvent(coreId,
                                                                   e.beginTimestamp +
                                                                   Utils.ExponentialDistr(compSystem.recoveryIntensity,
@@ -133,7 +133,7 @@ namespace ComputingSystemSimulation
                     #region RecoveryCore
                     //событие поломки ядра
                     case Event.EventTypes.RecoveryCore:
-                        Console.WriteLine("\nВосстановление");
+                        Console.WriteLine("\nВосстановление ядра " + (e as RecoveryEvent).coreId.ToString());
                         compSystem.RecoveryCore((e as RecoveryEvent).coreId);
                         break;
                         #endregion
