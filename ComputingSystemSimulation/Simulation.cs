@@ -144,7 +144,7 @@ namespace ComputingSystemSimulation
                 foreach (CompSystem.Core core in compSystem.workingCores)
                     log += core.ToString() + " ";
                 log += "\n";
-                Loging.WriteLogConsole(log, currentTime, true);
+                Loging.WriteLogConsole(log, currentTime);
                 #endregion
 
                 //если очередь не пуста
@@ -177,7 +177,7 @@ namespace ComputingSystemSimulation
                 #region Log
                 string log_task = Loging.LogTask(ts);
                 if (trace)
-                    Loging.WriteLogConsole(log_task, currentTime, true);
+                    Loging.WriteLogConsole(log_task, currentTime);
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
             }

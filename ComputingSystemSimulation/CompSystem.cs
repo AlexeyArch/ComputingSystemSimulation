@@ -128,7 +128,7 @@ namespace ComputingSystemSimulation
             int i = 0;
             while (counter < task.requiredCores)
             {
-                if(!workingCores[i].busy)
+                if (!workingCores[i].busy)
                 {
                     workingCores[i].busy = true;
                     workingCores[i].taskId = task.id;
