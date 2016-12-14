@@ -129,7 +129,7 @@ namespace ComputingSystemSimulation
                                                                                                e.beginTimestamp,
                                                                                             0)
                                                                                              );
-                        Console.ReadKey();
+                    
                         eventsCalendar.AddEvent(new RecoveryEvent(coreId,
                                                                   e.beginTimestamp +
                                                                   Utils.ExponentialDistr(compSystem.recoveryIntensity,
@@ -149,7 +149,7 @@ namespace ComputingSystemSimulation
                     //событие отмена задачи
                     case Event.EventTypes.CancelTask:
                         Console.WriteLine("\nОтмена задачи " + (e as TaskEvent).taskId.ToString());
-                        Console.ReadKey();
+               
                         eventsCalendar.CancelTask((e as TaskEvent));
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
                                                               (e as TaskEvent).taskId,

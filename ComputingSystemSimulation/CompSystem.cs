@@ -149,14 +149,15 @@ namespace ComputingSystemSimulation
         //возврат ресурсов
         public void ReturnRes(BaseTask task)
         {
+            int coreReturn = 0;
             foreach (Core core in workingCores)
                 if (core.taskId == task.id)
                 {
                     core.taskId = 0;
-                    core.busy = false;
+                    core.busy = false; coreReturn++;
                 }
 
-            nowCoresCount += task.requiredCores;
+            nowCoresCount += coreReturn;
             nowMemoryCount += task.requiredMemory;
         }
 
