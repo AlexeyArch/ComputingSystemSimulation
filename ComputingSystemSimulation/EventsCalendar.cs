@@ -50,6 +50,25 @@ namespace ComputingSystemSimulation
             return events[0];
         }
 
+        public void DeleteEvent(int eventId)
+        {
+            for (int i = 0; i < events.Count; i++)
+            {
+               // try
+               // {
+                    if ((events[i] as TaskEvent).taskId == eventId && events[i].type == Event.EventTypes.EndComputeTask)
+                    {
+                        events.RemoveAt(i);
+                        //break;
+                    }
+               // }
+               // catch(Exception exc)
+               // {
+                //    continue;
+               // }
+            }
+        }
+
         public int EventsCount()
         {
             return events.Count;

@@ -18,6 +18,7 @@ namespace ComputingSystemSimulation
             public Core(int id, bool busy)
             {
                 this.id = id;
+                this.busy = busy;
             }
 
             public override string ToString()
@@ -121,23 +122,44 @@ namespace ComputingSystemSimulation
                 return true;
         }
 
+        public bool IsNotBusy(BaseTask task)
+        {
+            int count = 0;
+            foreach (Core core in workingCores)
+            {
+                if(!core.busy)
+                    count++;
+            }
+            if (count >= task.requiredCores)
+                return true;
+            return false;
+        }
+
         //отнимание ресурсов
         public void TakeRes(BaseTask task)
         {
             int counter = 0;
             int i = 0;
-            while (counter < task.requiredCores)
+            if (IsFreeRes(task))
             {
-                if(!workingCores[i].busy)
+                if(IsNotBusy(task))
                 {
-                    workingCores[i].busy = true;
-                    workingCores[i].taskId = task.id;
-                    counter++;
+                    while (counter < task.requiredCores)
+                    {
+                        if(!workingCores[i].busy)
+                        {
+                            workingCores[i].busy = true;
+                            workingCores[i].taskId = task.id;
+                            counter++;
+                        }
+                        i++;
+                    }
+                    nowCoresCount -= task.requiredCores;
+                    nowMemoryCount -= task.requiredMemory;
                 }
-                i++;
+                
             }
-            nowCoresCount -= task.requiredCores;
-            nowMemoryCount -= task.requiredMemory;
+            
 
             //List<int> freeCores = getValueCore(0, task.requiredCores);
             //for (int i = 0; i < cores.Count(); i++)
@@ -166,10 +188,10 @@ namespace ComputingSystemSimulation
             int coreIndex = rand.Next(0, workingCores.Count() - 1);
             Core core = workingCores[coreIndex];
             workingCores.RemoveAt(coreIndex);
-            if (!core.busy)
+            //if (!core.busy)
                 nowCoresCount--;
-            else
-                core.busy = false;
+            //else
+                //core.busy = false;
 
             crashedCores.Add(core.id, core);
             return core.id;
@@ -180,6 +202,30 @@ namespace ComputingSystemSimulation
             workingCores.Add(crashedCores[coreId]);
             crashedCores.Remove(coreId);
             nowCoresCount++;
+        }
+
+        public bool CoreIsBusy(int coreId)
+        {
+            if (crashedCores[coreId].busy)
+                return true;
+            return false;
+        }
+
+        public int GetIdOfEvent(int coreId)
+        {
+            return crashedCores[coreId].taskId;
+        }
+
+        public void FreeRes(BaseTask task)
+        {
+            foreach (Core core in workingCores)
+                if (core.taskId == task.id)
+                {
+                    core.taskId = 0;
+                    core.busy = false;
+                    nowCoresCount++;
+                }
+            nowMemoryCount += task.requiredMemory;
         }
     }
 }
