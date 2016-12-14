@@ -41,6 +41,9 @@ namespace ComputingSystemSimulation
             //если хватает ресурсов, то добавляем события начала счета и убираем задачу из очереди
             if (compSystem.IsFreeRes(task))
             {
+                //уменьшаем свободные ресурсы
+                compSystem.TakeRes(task);
+
                 eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
                                                                   task.id,
                                                                   beginTimestamp,
@@ -88,8 +91,6 @@ namespace ComputingSystemSimulation
                                                               e.beginTimestamp + e.duration,
                                                               0)
                                                );                  
-                        //уменьшаем свободные ресурсы
-                        compSystem.TakeRes(tasks[(e as TaskEvent).taskId]);
 
                         //считаем время ожидания задачи в очереди
                         if (currentTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
