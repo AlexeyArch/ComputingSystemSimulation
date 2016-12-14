@@ -123,6 +123,13 @@ namespace ComputingSystemSimulation
                     case Event.EventTypes.CrashCore:
                         int coreId = compSystem.CrashCore();
                         Console.WriteLine("\nПоломка ядра " + coreId.ToString());
+                        //если ядро выполняло не нулевую задачу
+                        if (compSystem.GetTaskId2Core(coreId) != 0) eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.CancelTask,
+                                                                                               compSystem.GetTaskId2Core(coreId),
+                                                                                               e.beginTimestamp,
+                                                                                            0)
+                                                                                             );
+                        Console.ReadKey();
                         eventsCalendar.AddEvent(new RecoveryEvent(coreId,
                                                                   e.beginTimestamp +
                                                                   Utils.ExponentialDistr(compSystem.recoveryIntensity,
@@ -136,6 +143,20 @@ namespace ComputingSystemSimulation
                         Console.WriteLine("\nВосстановление ядра " + (e as RecoveryEvent).coreId.ToString());
                         compSystem.RecoveryCore((e as RecoveryEvent).coreId);
                         break;
+                    #endregion
+
+                    #region CancelTask
+                    //событие отмена задачи
+                    case Event.EventTypes.CancelTask:
+                        Console.WriteLine("\nОтмена задачи " + (e as TaskEvent).taskId.ToString());
+                        Console.ReadKey();
+                        eventsCalendar.CancelTask((e as TaskEvent));
+                        eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
+                                                              (e as TaskEvent).taskId,
+                                                              e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
+                                                              0)
+                                               );
+                        break;
                         #endregion
                 }
 
@@ -144,7 +165,7 @@ namespace ComputingSystemSimulation
                 foreach (CompSystem.Core core in compSystem.workingCores)
                     log += core.ToString() + " ";
                 log += "\n";
-                Loging.WriteLogConsole(log, currentTime, true);
+                Loging.WriteLogConsole(log, currentTime, false);
                 #endregion
 
                 //если очередь не пуста

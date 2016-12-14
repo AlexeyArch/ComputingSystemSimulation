@@ -36,6 +36,18 @@ namespace ComputingSystemSimulation
             return e; 
         }
 
+        public void CancelTask (TaskEvent ev)
+        {
+            for (int i=0; i< events.Count; i++)
+            {
+                if (events[i].type == Event.EventTypes.EndComputeTask && (events[i] as TaskEvent).taskId == ev.taskId)
+                {
+                    events.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
         public Event GetEvent(double time)
         {
             for (int i = 1; i < events.Count; i++)
