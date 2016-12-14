@@ -175,6 +175,11 @@ namespace ComputingSystemSimulation
             return core.id;
         }
 
+        public int GetTaskId2Core (int coreIndex)
+        {
+            return crashedCores[coreIndex].taskId;
+        }
+
         public void RecoveryCore(int coreId)
         {
             workingCores.Add(crashedCores[coreId]);

@@ -10,7 +10,7 @@ namespace ComputingSystemSimulation
     {
         public enum EventTypes
         {
-            AddTask, BeginComputeTask, EndComputeTask, FreeMemory, CrashCore, RecoveryCore
+            AddTask, BeginComputeTask, EndComputeTask, FreeMemory, CrashCore, RecoveryCore, CancelTask
         }
 
         public EventTypes type { get; private set; }
