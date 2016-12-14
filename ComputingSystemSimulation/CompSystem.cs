@@ -18,7 +18,6 @@ namespace ComputingSystemSimulation
             public Core(int id, bool busy)
             {
                 this.id = id;
-                this.busy = busy;
             }
 
             public override string ToString()
@@ -122,44 +121,23 @@ namespace ComputingSystemSimulation
                 return true;
         }
 
-        public bool IsNotBusy(BaseTask task)
-        {
-            int count = 0;
-            foreach (Core core in workingCores)
-            {
-                if(!core.busy)
-                    count++;
-            }
-            if (count >= task.requiredCores)
-                return true;
-            return false;
-        }
-
         //отнимание ресурсов
         public void TakeRes(BaseTask task)
         {
             int counter = 0;
             int i = 0;
-            if (IsFreeRes(task))
+            while (counter < task.requiredCores)
             {
-                if(IsNotBusy(task))
+                if (!workingCores[i].busy)
                 {
-                    while (counter < task.requiredCores)
-                    {
-                        if(!workingCores[i].busy)
-                        {
-                            workingCores[i].busy = true;
-                            workingCores[i].taskId = task.id;
-                            counter++;
-                        }
-                        i++;
-                    }
-                    nowCoresCount -= task.requiredCores;
-                    nowMemoryCount -= task.requiredMemory;
+                    workingCores[i].busy = true;
+                    workingCores[i].taskId = task.id;
+                    counter++;
                 }
-                
+                i++;
             }
-            
+            nowCoresCount -= task.requiredCores;
+            nowMemoryCount -= task.requiredMemory;
 
             //List<int> freeCores = getValueCore(0, task.requiredCores);
             //for (int i = 0; i < cores.Count(); i++)
@@ -171,14 +149,15 @@ namespace ComputingSystemSimulation
         //возврат ресурсов
         public void ReturnRes(BaseTask task)
         {
+            int coreReturn = 0;
             foreach (Core core in workingCores)
                 if (core.taskId == task.id)
                 {
                     core.taskId = 0;
-                    core.busy = false;
+                    core.busy = false; coreReturn++;
                 }
 
-            nowCoresCount += task.requiredCores;
+            nowCoresCount += coreReturn;
             nowMemoryCount += task.requiredMemory;
         }
 
@@ -188,13 +167,18 @@ namespace ComputingSystemSimulation
             int coreIndex = rand.Next(0, workingCores.Count() - 1);
             Core core = workingCores[coreIndex];
             workingCores.RemoveAt(coreIndex);
-            //if (!core.busy)
+            if (!core.busy)
                 nowCoresCount--;
-            //else
-                //core.busy = false;
+            else
+                core.busy = false;
 
             crashedCores.Add(core.id, core);
             return core.id;
+        }
+
+        public int GetTaskId2Core (int coreIndex)
+        {
+            return crashedCores[coreIndex].taskId;
         }
 
         public void RecoveryCore(int coreId)
@@ -202,30 +186,6 @@ namespace ComputingSystemSimulation
             workingCores.Add(crashedCores[coreId]);
             crashedCores.Remove(coreId);
             nowCoresCount++;
-        }
-
-        public bool CoreIsBusy(int coreId)
-        {
-            if (crashedCores[coreId].busy)
-                return true;
-            return false;
-        }
-
-        public int GetIdOfEvent(int coreId)
-        {
-            return crashedCores[coreId].taskId;
-        }
-
-        public void FreeRes(BaseTask task)
-        {
-            foreach (Core core in workingCores)
-                if (core.taskId == task.id)
-                {
-                    core.taskId = 0;
-                    core.busy = false;
-                    nowCoresCount++;
-                }
-            nowMemoryCount += task.requiredMemory;
         }
     }
 }

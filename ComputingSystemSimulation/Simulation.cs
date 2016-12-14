@@ -18,7 +18,6 @@ namespace ComputingSystemSimulation
         private List<BaseTask> tasksQueue = new List<BaseTask>();
 
         private double MaxTimeInQueue = 0;
-        private int CountOfCancelTasks = 0;
 
         public Simulation()
         {
@@ -122,32 +121,41 @@ namespace ComputingSystemSimulation
                     #region CrashCore
                     //событие поломки ядра
                     case Event.EventTypes.CrashCore:
-                        
                         int coreId = compSystem.CrashCore();
-                        Console.WriteLine("\nПоломка в ядре: " + coreId);
-                        Loging.WriteLogFile("\nПоломка в ядре: " + coreId, currentTime);
+                        Console.WriteLine("\nПоломка ядра " + coreId.ToString());
+                        //если ядро выполняло не нулевую задачу
+                        if (compSystem.GetTaskId2Core(coreId) != 0) eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.CancelTask,
+                                                                                               compSystem.GetTaskId2Core(coreId),
+                                                                                               e.beginTimestamp,
+                                                                                            0)
+                                                                                             );
+                    
                         eventsCalendar.AddEvent(new RecoveryEvent(coreId,
                                                                   e.beginTimestamp +
                                                                   Utils.ExponentialDistr(compSystem.recoveryIntensity,
                                                                                          new Random().NextDouble())));
-                        if (compSystem.CoreIsBusy(coreId))
-                        {
-                            eventsCalendar.DeleteEvent(compSystem.GetIdOfEvent(coreId));
-                            compSystem.FreeRes(tasks[compSystem.GetIdOfEvent(coreId)]);
-                            CountOfCancelTasks++;
-                        }
-                            
-
-
                         break;
                     #endregion
 
                     #region RecoveryCore
                     //событие поломки ядра
                     case Event.EventTypes.RecoveryCore:
-                        Console.WriteLine("\nВосстановление");
-                        Loging.WriteLogFile("\nВосстановление", currentTime);
+                        Console.WriteLine("\nВосстановление ядра " + (e as RecoveryEvent).coreId.ToString());
                         compSystem.RecoveryCore((e as RecoveryEvent).coreId);
+                        break;
+                    #endregion
+
+                    #region CancelTask
+                    //событие отмена задачи
+                    case Event.EventTypes.CancelTask:
+                        Console.WriteLine("\nОтмена задачи " + (e as TaskEvent).taskId.ToString());
+               
+                        eventsCalendar.CancelTask((e as TaskEvent));
+                        eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
+                                                              (e as TaskEvent).taskId,
+                                                              e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
+                                                              0)
+                                               );
                         break;
                         #endregion
                 }
@@ -157,8 +165,7 @@ namespace ComputingSystemSimulation
                 foreach (CompSystem.Core core in compSystem.workingCores)
                     log += core.ToString() + " ";
                 log += "\n";
-                Loging.WriteLogConsole(log, currentTime, false);
-                Loging.WriteLogFile(log, currentTime);
+                Loging.WriteLogConsole(log, currentTime);
                 #endregion
 
                 //если очередь не пуста
@@ -191,13 +198,12 @@ namespace ComputingSystemSimulation
                 #region Log
                 string log_task = Loging.LogTask(ts);
                 if (trace)
-                    Loging.WriteLogConsole(log_task, currentTime, true);
+                    Loging.WriteLogConsole(log_task, currentTime);
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
             }
 
             Console.WriteLine("MaxTimeInQueue = " + MaxTimeInQueue.ToString("0.000"));
-            Console.WriteLine("CountOfCancelTasks = " + CountOfCancelTasks.ToString("0.000"));
         }
     }
 }

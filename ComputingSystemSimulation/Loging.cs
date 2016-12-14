@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.IO;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -7,7 +6,7 @@ namespace ComputingSystemSimulation
 {
     class Loging
     {
-        public static void WriteLogFile ( string log, double SystemTime, bool append = true, string filename = "log.txt")
+        public static void WriteLogFile (string log, double SystemTime, bool append = true, string filename = "log.txt")
         {
             StreamWriter sw = new StreamWriter(filename, append);
             sw.WriteLine("[" + SystemTime.ToString("0.000") + "]: " + log);

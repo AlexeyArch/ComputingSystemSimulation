@@ -4,11 +4,11 @@
   <memory_count>256</memory_count>
   <max_task_cores_count>16</max_task_cores_count>
   <max_task_memory_count>64</max_task_memory_count>
-  <supply_intensity>1</supply_intensity>
+  <supply_intensity>2</supply_intensity>
   <work_intensity>0,3</work_intensity>
   <max_task_work_time>2</max_task_work_time>
   <free_memory_time_ratio>0,0001</free_memory_time_ratio>
-  <crash_intensity>0,01</crash_intensity>
+  <crash_intensity>1</crash_intensity>
   <recovery_intensity>0,1</recovery_intensity>
   <reserve_cores_count>2</reserve_cores_count>
   <max_time_for_wait>0</max_time_for_wait>
