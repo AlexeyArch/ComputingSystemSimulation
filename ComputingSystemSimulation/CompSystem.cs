@@ -154,7 +154,8 @@ namespace ComputingSystemSimulation
                 if (core.taskId == task.id)
                 {
                     core.taskId = 0;
-                    core.busy = false; coreReturn++;
+                    core.busy = false;
+                    coreReturn++;
                 }
 
             nowCoresCount += coreReturn;
