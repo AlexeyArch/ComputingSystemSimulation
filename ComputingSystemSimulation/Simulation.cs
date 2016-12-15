@@ -208,7 +208,7 @@ namespace ComputingSystemSimulation
                 #region Log
                 string log_task = Loging.LogTask(ts);
                 if (trace)
-                    Loging.WriteLogConsole(log_task, currentTime, true);
+                    Loging.WriteLogConsole(log_task, currentTime);
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
             }
