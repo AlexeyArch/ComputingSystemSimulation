@@ -79,12 +79,19 @@ namespace ComputingSystemSimulation
                     case Event.EventTypes.AddTask:
                         //добавляем задачу в очередь
                         tasksQueue.Add(tasks[(e as TaskEvent).taskId]);
+                        if (compSystem.priority)
+                            eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.JumpTask,
+                                                                  (e as TaskEvent).taskId,
+                                                                  currentTime + tasks[(e as TaskEvent).taskId].waitTime,
+                                                                  0));
                         break;
                     #endregion
 
                     #region BeginComputeTask
                     //событие начала счета задачи
                     case Event.EventTypes.BeginComputeTask:
+                        //отмена перескока
+                        eventsCalendar.CancelJumpTaskEvent((e as TaskEvent).taskId);
                         //добавляем событие конца счета
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
                                                               (e as TaskEvent).taskId,
@@ -124,7 +131,7 @@ namespace ComputingSystemSimulation
                         int coreId = compSystem.CrashCore();
                         Console.WriteLine("\nПоломка ядра " + coreId.ToString());
                         //если ядро выполняло не нулевую задачу
-                        if (compSystem.GetTaskId2Core(coreId) != 0) eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.CancelTask,
+                        if (compSystem.GetTaskId2Core(coreId) != 0) eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.CancelEndComputeTask,
                                                                                                compSystem.GetTaskId2Core(coreId),
                                                                                                e.beginTimestamp,
                                                                                             0)
@@ -145,19 +152,28 @@ namespace ComputingSystemSimulation
                         break;
                     #endregion
 
-                    #region CancelTask
+                    #region CancelEndComputeTask
                     //событие отмена задачи
-                    case Event.EventTypes.CancelTask:
+                    case Event.EventTypes.CancelEndComputeTask:
                         Console.WriteLine("\nОтмена задачи " + (e as TaskEvent).taskId.ToString());
                
-                        eventsCalendar.CancelTask((e as TaskEvent));
+                        eventsCalendar.CancelEndComputeTaskEvent((e as TaskEvent));
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
                                                               (e as TaskEvent).taskId,
                                                               e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
                                                               0)
                                                );
                         break;
-                        #endregion
+                    #endregion
+
+                    #region Jump
+                    case Event.EventTypes.JumpTask:
+                        BaseTask task =  tasksQueue.Find(x => x.id == (e as TaskEvent).taskId);
+                        tasksQueue.Remove(task);
+                        tasksQueue.Insert(0, task);
+                        break;
+                    #endregion
+
                 }
 
                 #region Log
@@ -182,18 +198,18 @@ namespace ComputingSystemSimulation
   
                 //если моделирование с перескоком задач, то проверяем, сколько по времени первая задача уже ожидает в очереди
                 //if (ts.waitTime>0 && (ts.waitTime < SystemTime - ts.addTime))
-                if (compSystem.maxTimeForWait > 0 && (compSystem.maxTimeForWait < currentTime - ts.addTime))
-                {
-                    //перебераем последуюущие задачи, пока не найдет ту, которой хватит ресурсов
-                    for (int i = 1; i < tasksQueue.Count(); i++)
-                    {
-                        if (TryAddBeginComputeTaskEvent(tasksQueue[i], e.beginTimestamp, i))
-                        {
-                            Console.WriteLine("\nЗадача перескочила");
-                            break;
-                        }
-                    }
-                }
+                //if (compSystem.maxTimeForWait > 0 && (compSystem.maxTimeForWait < currentTime - ts.addTime))
+                //{
+                //    //перебераем последуюущие задачи, пока не найдет ту, которой хватит ресурсов
+                //    for (int i = 1; i < tasksQueue.Count(); i++)
+                //    {
+                //        if (TryAddBeginComputeTaskEvent(tasksQueue[i], e.beginTimestamp, i))
+                //        {
+                //            Console.WriteLine("\nЗадача перескочила");
+                //            break;
+                //        }
+                //    }
+                //}
                     
                 #region Log
                 string log_task = Loging.LogTask(ts);
