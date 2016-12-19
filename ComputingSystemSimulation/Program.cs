@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ComputingSystemSimulation
 {
@@ -10,7 +6,7 @@ namespace ComputingSystemSimulation
     {
         static void Main(string[] args)
         {
-            bool trace = false;
+            bool trace = true;
 
             Loging.WriteLogFile("", 0, false);
             Simulation simulation = new Simulation();
