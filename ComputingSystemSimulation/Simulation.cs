@@ -171,6 +171,7 @@ namespace ComputingSystemSimulation
                         BaseTask task =  tasksQueue.Find(x => x.id == (e as TaskEvent).taskId);
                         tasksQueue.Remove(task);
                         tasksQueue.Insert(0, task);
+                        Console.WriteLine("\nЗадача перескочила");
                         break;
                     #endregion
 
