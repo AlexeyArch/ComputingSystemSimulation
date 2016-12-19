@@ -10,7 +10,7 @@ namespace ComputingSystemSimulation
     {
         public static double ExponentialDistr(double lambda, double x)
         {
-            //return 1 - Math.Exp(-lambda * x);
+          //  return 1 - Math.Exp(-lambda * x);
             return -Math.Log(x) / lambda;
         }
     }

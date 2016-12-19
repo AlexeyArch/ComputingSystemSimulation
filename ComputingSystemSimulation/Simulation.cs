@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ComputingSystemSimulation
 {
@@ -18,6 +17,9 @@ namespace ComputingSystemSimulation
         private List<BaseTask> tasksQueue = new List<BaseTask>();
 
         private double MaxTimeInQueue = 0;
+
+        private double taskTimes = 0;
+        private double countTask = 0;
 
         public Simulation()
         {
@@ -62,6 +64,7 @@ namespace ComputingSystemSimulation
 
         public void StartSimulation(bool trace = false)
         {
+            StreamWriter sw = new StreamWriter("avgr_time.csv");
             //до тех пор, пока в календаре событий есть события
             while (eventsCalendar.EventsCount() > 0)
             {
@@ -101,8 +104,7 @@ namespace ComputingSystemSimulation
                                                );                  
 
                         //считаем время ожидания задачи в очереди
-                        if (currentTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
-                            MaxTimeInQueue = currentTime - tasks[(e as TaskEvent).taskId].addTime;
+                        
                         break;
                     #endregion
 
@@ -115,6 +117,12 @@ namespace ComputingSystemSimulation
                                                               e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
                                                               0)
                                                );
+                        countTask++;
+                        taskTimes += currentTime - tasks[(e as TaskEvent).taskId].addTime;
+                        if (currentTime - tasks[(e as TaskEvent).taskId].addTime > MaxTimeInQueue)
+                            MaxTimeInQueue = currentTime - tasks[(e as TaskEvent).taskId].addTime;
+                        sw.WriteLine(taskTimes/countTask + ";" + tasksQueue.Count() + ";" + MaxTimeInQueue + ";");
+                        
                         break;
                     #endregion
 
@@ -186,7 +194,9 @@ namespace ComputingSystemSimulation
                 foreach (CompSystem.Core core in compSystem.workingCores)
                     log += core.ToString() + " ";
                 log += "\n";
-                Loging.WriteLogConsole(log, currentTime);
+                /*if (trace)
+                    Loging.WriteLogConsole(log, currentTime, false);
+                Loging.WriteLogFile(log, currentTime, true);*/
                 #endregion
 
                 //если очередь не пуста
@@ -223,7 +233,7 @@ namespace ComputingSystemSimulation
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
             }
-
+            sw.Close();
             Console.WriteLine("MaxTimeInQueue = " + MaxTimeInQueue.ToString("0.000"));
         }
     }
