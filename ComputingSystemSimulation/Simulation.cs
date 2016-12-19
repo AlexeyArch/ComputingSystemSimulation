@@ -44,6 +44,9 @@ namespace ComputingSystemSimulation
                 //уменьшаем свободные ресурсы
                 compSystem.TakeRes(task);
 
+                //отмена перескока
+                eventsCalendar.CancelJumpTaskEvent(task.id);
+
                 eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.BeginComputeTask,
                                                                   task.id,
                                                                   beginTimestamp,
@@ -90,8 +93,6 @@ namespace ComputingSystemSimulation
                     #region BeginComputeTask
                     //событие начала счета задачи
                     case Event.EventTypes.BeginComputeTask:
-                        //отмена перескока
-                        eventsCalendar.CancelJumpTaskEvent((e as TaskEvent).taskId);
                         //добавляем событие конца счета
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.EndComputeTask,
                                                               (e as TaskEvent).taskId,
@@ -157,7 +158,7 @@ namespace ComputingSystemSimulation
                     case Event.EventTypes.CancelEndComputeTask:
                         Console.WriteLine("\nОтмена задачи " + (e as TaskEvent).taskId.ToString());
                
-                        eventsCalendar.CancelEndComputeTaskEvent((e as TaskEvent));
+                        eventsCalendar.CancelEndComputeTaskEvent((e as TaskEvent).taskId);
                         eventsCalendar.AddEvent(new TaskEvent(Event.EventTypes.FreeMemory,
                                                               (e as TaskEvent).taskId,
                                                               e.beginTimestamp + tasks[(e as TaskEvent).taskId].freeMemoryTime,
@@ -169,12 +170,15 @@ namespace ComputingSystemSimulation
                     #region Jump
                     case Event.EventTypes.JumpTask:
                         BaseTask task =  tasksQueue.Find(x => x.id == (e as TaskEvent).taskId);
-                        tasksQueue.Remove(task);
-                        tasksQueue.Insert(0, task);
-                        Console.WriteLine("\nЗадача перескочила");
+                        int index = tasksQueue.IndexOf(task);
+                        if (index != 0)
+                        {
+                            tasksQueue.Remove(task);
+                            tasksQueue.Insert(0, task);
+                            Console.WriteLine("\nЗадача перескочила с позиции " + index.ToString());
+                        }
                         break;
                     #endregion
-
                 }
 
                 #region Log
@@ -215,7 +219,7 @@ namespace ComputingSystemSimulation
                 #region Log
                 string log_task = Loging.LogTask(ts);
                 if (trace)
-                    Loging.WriteLogConsole(log_task, currentTime);
+                    Loging.WriteLogConsole(log_task, currentTime, true);
                 Loging.WriteLogFile(log_task, currentTime);
                 #endregion
             }

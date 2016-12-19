@@ -10,7 +10,7 @@ namespace ComputingSystemSimulation
     {
         static void Main(string[] args)
         {
-            bool trace = false;
+            bool trace = true;
 
             Loging.WriteLogFile("", 0, false);
             Simulation simulation = new Simulation();
